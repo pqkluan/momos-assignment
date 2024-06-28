@@ -1,8 +1,6 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import {
-  PropertyPayload,
-  SupportedPropertyType,
-} from "../services/notion/types";
+import { TableRowData } from "../types/table";
+import { PropertyPayload, SupportedPropertyType } from "../types/notion";
 
 const supportMaps: Record<SupportedPropertyType, true> = {
   checkbox: true,
@@ -17,18 +15,14 @@ const supportMaps: Record<SupportedPropertyType, true> = {
 // This will ensure that the supportedTypes array is always in sync with the SupportedPropertyType type
 const supportedTypes = Object.keys(supportMaps);
 
-export type NotionDataRow = {
-  [key: string]: PropertyPayload | string;
-};
-
-export const transformNotionData = (
+export const transformPageResponse = (
   data: PageObjectResponse[]
-): NotionDataRow[] => {
+): TableRowData[] => {
   // TODO: use zod to validate the data
 
   return data.map((item) => {
     const { id, properties } = item;
-    const dto: NotionDataRow = { id };
+    const dto: TableRowData = { id };
 
     for (const key in properties) {
       const property = properties[key];

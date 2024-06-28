@@ -26,7 +26,7 @@ export type PropertyRichText = {
     type: "text";
     text: {
       content: string;
-      link: string | null;
+      link?: string;
     };
     annotations: {
       bold: boolean;
@@ -37,7 +37,7 @@ export type PropertyRichText = {
       color: string;
     };
     plain_text: string;
-    href: string | null;
+    href?: string;
   }[];
 };
 
@@ -70,11 +70,11 @@ export type PropertyCheckbox = {
 export type PropertyDate = {
   id: string;
   type: "date";
-  date: {
-    end: null;
+  date?: {
     start: string;
-    time_zone: null;
-  } | null;
+    end?: string;
+    time_zone?: string;
+  };
 };
 
 export type PropertyPayload =

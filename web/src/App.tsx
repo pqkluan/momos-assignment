@@ -1,26 +1,20 @@
-import { useCallback, useState } from "react";
-import { useDidMount } from "./hooks/useDidMount";
+import { FC, useCallback, useState } from "react";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { SampleTable } from "./components/SampleTable";
-import {
-  NotionDataRow,
-  transformNotionData,
-} from "./transforms/transformNotionData";
 
-// type RowData = {
-//   id: string;
-// 	properties:Record<string,
-// };
+import { transformPageResponse } from "./transforms/transformPageResponse";
+import { Table } from "./components/Table";
+import { useDidMount } from "./hooks/useDidMount";
+import { TableRowData } from "./types/table";
 
-function App() {
-  const [data, setData] = useState<NotionDataRow[]>([]);
+export const App: FC = () => {
+  const [data, setData] = useState<TableRowData[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:8000/");
       const payload = (await response.json()) as PageObjectResponse[];
 
-      setData(transformNotionData(payload));
+      setData(transformPageResponse(payload));
     } catch (error) {
       console.error("Failed to fetch notion data", error);
     }
@@ -33,16 +27,7 @@ function App() {
   return (
     <div>
       <h1>{"Momos - Assignment"}</h1>
-
-      <SampleTable />
-
-      {data.map((item, index) => (
-        <div key={index}>
-          <pre>{JSON.stringify(item, null, 2)}</pre>
-        </div>
-      ))}
+      {data.length > 0 ? <Table data={data} /> : null}
     </div>
   );
-}
-
-export default App;
+};
