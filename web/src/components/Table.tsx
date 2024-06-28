@@ -1,16 +1,32 @@
+import { FC, useState } from "react";
 import {
   OnChangeFn,
   SortingState,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { FC } from "react";
+
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 
 import { TableRowData } from "../types/table";
 import styles from "./Table.module.css";
 import { TableHeader } from "./TableHeader";
-import { TableRow } from "./TableRow";
+import { TableCell } from "./TableCell";
 import { useDynamicColumns } from "./useDynamicColumns";
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 
 type TableProps = {
   sorting: SortingState;
@@ -18,27 +34,61 @@ type TableProps = {
   data?: TableRowData[];
 };
 
+const defaultData: TableRowData[] = [];
+
 export const Table: FC<TableProps> = (props) => {
-  const { data = [], sorting, setSorting } = props;
+  const { data = defaultData, sorting, setSorting } = props;
 
   const columns = useDynamicColumns(data);
+  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+    columns.map((c) => String(c.accessorKey))
+  );
 
   const table = useReactTable({
     data,
     columns,
     columnResizeMode: "onChange",
-    state: { sorting },
+    state: { sorting, columnOrder },
     manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
+    onColumnOrderChange: setColumnOrder,
   });
 
   const { getHeaderGroups } = table;
   const rows = table.getRowModel().rows;
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex);
+      });
+    }
+  }
+
+  const sensors = useSensors(
+    // Important: prevent dragging when clicking on the sort button
+    useSensor(MouseSensor, { activationConstraint: { distance: 0.1 } }),
+    useSensor(TouchSensor, {})
+  );
+
   return (
-    <div style={{ direction: table.options.columnResizeDirection }}>
-      <div style={{ overflowX: "auto" }}>
+    <DndContext
+      collisionDetection={closestCenter}
+      modifiers={[restrictToHorizontalAxis]}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+    >
+      <div
+        style={{
+          overflowX: "auto",
+          direction: table.options.columnResizeDirection,
+        }}
+      >
         <table
           className={styles.table}
           style={{ width: table.getCenterTotalSize() }}
@@ -46,23 +96,38 @@ export const Table: FC<TableProps> = (props) => {
           <thead>
             {getHeaderGroups().map(({ id: groupId, headers }) => (
               <tr key={groupId}>
-                {headers.map((header) => (
-                  <TableHeader key={header.id} header={header} />
-                ))}
+                <SortableContext
+                  items={columnOrder}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  {headers.map((header) => (
+                    <TableHeader key={header.id} header={header} />
+                  ))}
+                </SortableContext>
               </tr>
             ))}
           </thead>
 
           <tbody>
-            {rows.length === 0 && <Loading noOfColumns={columns.length} />}
-
             {rows.map((row) => (
-              <TableRow key={row.id} row={row} />
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <SortableContext
+                    key={cell.id}
+                    items={columnOrder}
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    <TableCell key={cell.id} cell={cell} />
+                  </SortableContext>
+                ))}
+              </tr>
             ))}
+
+            {rows.length === 0 && <Loading noOfColumns={columns.length} />}
           </tbody>
         </table>
       </div>
-    </div>
+    </DndContext>
   );
 };
 

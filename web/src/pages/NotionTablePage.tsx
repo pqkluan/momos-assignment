@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { SortingState } from "@tanstack/react-table";
 import { notionApi } from "../apis/notion";
@@ -7,31 +7,36 @@ import { Table } from "../components/Table";
 import { useQuery } from "@tanstack/react-query";
 
 export const NotionTablePage: FC = () => {
+  const [initialized, setInitialized] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["notion", sorting],
-    queryFn: async () => {
-      return notionApi.queryDb({
+    queryFn: () =>
+      notionApi.queryDb({
         sorts: sorting.map((sort) => ({
           property: sort.id,
           direction: sort.desc ? "descending" : "ascending",
         })),
-      });
-    },
+      }),
+
     select: (data) => transformPageResponse(data),
   });
 
-  // TODO: better UX for loading states
+  useEffect(() => {
+    if (initialized) return;
+    if (!Array.isArray(data)) return;
+    setInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   return (
     <div>
       <h1>{"Momos - Assignment"}</h1>
-
-      {isLoading ? (
-        <div>{"Initial loading..."}</div>
-      ) : (
+      {initialized ? (
         <Table data={data} sorting={sorting} setSorting={setSorting} />
+      ) : (
+        <div>{"Loading..."}</div>
       )}
     </div>
   );

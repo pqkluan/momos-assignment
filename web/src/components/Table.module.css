@@ -3,7 +3,6 @@
   border-collapse: collapse;
   font-size: 14px;
 
-  /* css add animation to fade in and fade out */
   animation: fade-in 1s;
 }
 
@@ -20,11 +19,10 @@
 .table td {
   border: 1px solid #ddd;
   padding: 8px;
-  text-align: left;
 }
 
 .table th {
-  cursor: pointer;
+  cursor: grab;
   position: relative;
 }
 
@@ -37,7 +35,9 @@
 }
 
 .sortIcon {
-  margin-left: 5px;
+  margin-left: 4px;
+
+  cursor: pointer;
 }
 
 .resizer {
