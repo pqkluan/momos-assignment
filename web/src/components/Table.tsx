@@ -38,6 +38,7 @@ export const Table: FC<TableProps> = (props) => {
   });
 
   const { getHeaderGroups } = table;
+  const rows = table.getRowModel().rows;
 
   return (
     <table className={styles.table}>
@@ -58,13 +59,23 @@ export const Table: FC<TableProps> = (props) => {
       </thead>
 
       <tbody>
-        {table.getRowModel().rows.map((row) => (
+        {rows.length === 0 && <Loading noOfColumns={columns.length} />}
+
+        {rows.map((row) => (
           <TableRow key={row.id} row={row} />
         ))}
       </tbody>
     </table>
   );
 };
+
+const Loading = (props: { noOfColumns: number }) => (
+  <tr>
+    <td colSpan={props.noOfColumns} style={{ textAlign: "center" }}>
+      {"Loading ..."}
+    </td>
+  </tr>
+);
 
 type Column = AccessorKeyColumnDef<TableRowData, PropertyPayload>;
 
