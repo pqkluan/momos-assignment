@@ -9,24 +9,30 @@ import { useQuery } from "@tanstack/react-query";
 export const NotionTablePage: FC = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["notion", sorting],
     queryFn: async () => {
       return notionApi.queryDb({
         sorts: sorting.map((sort) => ({
           property: sort.id,
-          direction: sort.desc ? "ascending" : "descending",
+          direction: sort.desc ? "descending" : "ascending",
         })),
       });
     },
-    initialData: [],
     select: (data) => transformPageResponse(data),
   });
+
+  // TODO: better UX for loading states
 
   return (
     <div>
       <h1>{"Momos - Assignment"}</h1>
-      {<Table data={data} sorting={sorting} setSorting={setSorting} />}
+
+      {isLoading ? (
+        <div>{"Initial loading..."}</div>
+      ) : (
+        <Table data={data} sorting={sorting} setSorting={setSorting} />
+      )}
     </div>
   );
 };

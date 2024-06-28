@@ -1,36 +1,32 @@
-import { FC, useMemo, useRef } from "react";
 import {
-  AccessorKeyColumnDef,
   OnChangeFn,
   SortingState,
-  createColumnHelper,
-  flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { FC } from "react";
 
 import { TableRowData } from "../types/table";
-import { PropertyPayload } from "../types/notion";
 import styles from "./Table.module.css";
-import { TableRow } from "./TableRow";
 import { TableHeader } from "./TableHeader";
-
-const columnHelper = createColumnHelper<TableRowData>();
+import { TableRow } from "./TableRow";
+import { useDynamicColumns } from "./useDynamicColumns";
 
 type TableProps = {
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
-  data: TableRowData[];
+  data?: TableRowData[];
 };
 
 export const Table: FC<TableProps> = (props) => {
-  const { data, sorting, setSorting } = props;
+  const { data = [], sorting, setSorting } = props;
 
   const columns = useDynamicColumns(data);
 
   const table = useReactTable({
     data,
     columns,
+    columnResizeMode: "onChange",
     state: { sorting },
     manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
@@ -41,31 +37,32 @@ export const Table: FC<TableProps> = (props) => {
   const rows = table.getRowModel().rows;
 
   return (
-    <table className={styles.table}>
-      <thead>
-        {getHeaderGroups().map(({ id: groupId, headers }) => (
-          <tr key={groupId}>
-            {headers.map(({ id: headerId, column, getContext }) => (
-              <TableHeader
-                key={headerId}
-                onToggleSort={() => column.toggleSorting()}
-                sort={column.getIsSorted() || undefined}
-              >
-                {flexRender(column.columnDef.header, getContext())}
-              </TableHeader>
+    <div style={{ direction: table.options.columnResizeDirection }}>
+      <div style={{ overflowX: "auto" }}>
+        <table
+          className={styles.table}
+          style={{ width: table.getCenterTotalSize() }}
+        >
+          <thead>
+            {getHeaderGroups().map(({ id: groupId, headers }) => (
+              <tr key={groupId}>
+                {headers.map((header) => (
+                  <TableHeader key={header.id} header={header} />
+                ))}
+              </tr>
             ))}
-          </tr>
-        ))}
-      </thead>
+          </thead>
 
-      <tbody>
-        {rows.length === 0 && <Loading noOfColumns={columns.length} />}
+          <tbody>
+            {rows.length === 0 && <Loading noOfColumns={columns.length} />}
 
-        {rows.map((row) => (
-          <TableRow key={row.id} row={row} />
-        ))}
-      </tbody>
-    </table>
+            {rows.map((row) => (
+              <TableRow key={row.id} row={row} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
@@ -76,90 +73,3 @@ const Loading = (props: { noOfColumns: number }) => (
     </td>
   </tr>
 );
-
-type Column = AccessorKeyColumnDef<TableRowData, PropertyPayload>;
-
-/**
- * Generate columns based on the first row of the data.
- */
-function useDynamicColumns(data: TableRowData[]) {
-  const firstRow = data[0];
-
-  const prevColumns = useRef<Column[]>([]);
-
-  return useMemo<Column[]>(() => {
-    // Return the previous columns in case of data changed when fetching.
-    if (!firstRow) return prevColumns.current;
-
-    const columns = Object.entries(firstRow).reduce<Column[]>((acc, pair) => {
-      const [key, value] = pair;
-
-      // We don't want to render the id column
-      if (key === "id") return acc;
-      // Nor any string property, because Notion don't return plain string
-      if (typeof value === "string") return acc;
-
-      acc.push(
-        columnHelper.accessor(key, {
-          header: () => key,
-          cell: (info) => {
-            const value = info.getValue();
-
-            switch (value.type) {
-              case "checkbox": {
-                return (
-                  <input type="checkbox" checked={value.checkbox} readOnly />
-                );
-              }
-              case "date": {
-                if (!value.date) return null;
-                const { start, end } = value.date;
-                return (
-                  <span>
-                    {[start, end]
-                      .filter((e): e is string => !!e)
-                      .map((d) => new Date(d).toLocaleDateString("en-GB"))
-                      .join(" - ")}
-                  </span>
-                );
-              }
-              case "multi_select": {
-                return (
-                  <span>
-                    {value.multi_select.map((e) => e.name).join(", ")}
-                  </span>
-                );
-              }
-              case "number": {
-                return <span>{value.number}</span>;
-              }
-              case "rich_text": {
-                return (
-                  <span>
-                    {value.rich_text.map((e) => e.text.content).join(", ")}
-                  </span>
-                );
-              }
-              case "select": {
-                return <span>{value.select.name}</span>;
-              }
-              case "status": {
-                return <span>{value.status.name}</span>;
-              }
-              default: {
-                console.warn(`Unsupported type: ${value}`);
-                return <span>{"Unsupported"}</span>;
-              }
-            }
-          },
-        })
-      );
-
-      return acc;
-    }, []);
-
-    prevColumns.current = columns;
-
-    return columns;
-  }, [firstRow]);
-}
