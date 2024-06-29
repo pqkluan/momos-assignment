@@ -1,5 +1,5 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { TableRowData } from "../types/table";
+import { TableRow } from "../types/table";
 import { PropertyPayload, SupportedPropertyType } from "../types/notion";
 
 const supportMaps: Record<SupportedPropertyType, true> = {
@@ -17,12 +17,12 @@ const supportedTypes = Object.keys(supportMaps);
 
 export const transformPageResponse = (
   data: PageObjectResponse[]
-): TableRowData[] => {
+): TableRow[] => {
   // TODO: use zod to validate the data
 
   return data.map((item) => {
     const { id, properties } = item;
-    const dto: TableRowData = { id };
+    const dto: TableRow = { id };
 
     for (const key in properties) {
       const property = properties[key];

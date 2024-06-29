@@ -9,11 +9,11 @@ import { Header, SortDirection, flexRender } from "@tanstack/react-table";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 
-import { TableRowData } from "../types/table";
+import { TableRow } from "../types/table";
 import styles from "./Table.module.css";
 
 type Props = PropsWithChildren<{
-  header: Header<TableRowData, unknown>;
+  header: Header<TableRow, unknown>;
 }>;
 
 export const TableHeader: FC<Props> = (props) => {
@@ -47,7 +47,7 @@ export const TableHeader: FC<Props> = (props) => {
           ? null
           : flexRender(column.columnDef.header, getContext())}
 
-        <SortIcon
+        <SortButton
           sort={column.getIsSorted()}
           toggleSorting={column.toggleSorting}
         />
@@ -68,7 +68,7 @@ export const TableHeader: FC<Props> = (props) => {
   );
 };
 
-const SortIcon = (props: {
+const SortButton = (props: {
   sort: SortDirection | false;
   toggleSorting: () => void;
 }) => {

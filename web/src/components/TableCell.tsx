@@ -4,10 +4,10 @@ import { Cell, flexRender } from "@tanstack/react-table";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 
-import { TableRowData } from "../types/table";
+import { TableRow } from "../types/table";
 
 type Props = {
-  cell: Cell<TableRowData, unknown>;
+  cell: Cell<TableRow, unknown>;
 };
 
 export const TableCell = (props: Props) => {

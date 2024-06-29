@@ -1,6 +1,7 @@
 /**
  * This file contains the payload types that are returned by the Notion API for the properties of a page.
  * Not all property types are supported by this application, so only the supported types are defined here.
+ * FIXME: We are wronged about the "supported" types. We should support all types.
  */
 
 export type PropertyNumber = {

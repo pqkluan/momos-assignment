@@ -1,45 +1,34 @@
-import { FC, useState } from "react";
 import {
   OnChangeFn,
   SortingState,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { FC, useState } from "react";
 
-import {
-  DndContext,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  type DragEndEvent,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-
-import { TableRowData } from "../types/table";
+import { TableColumn, TableRow } from "../types/table";
 import styles from "./Table.module.css";
-import { TableHeader } from "./TableHeader";
 import { TableCell } from "./TableCell";
-import { useDynamicColumns } from "./useDynamicColumns";
-import {
-  SortableContext,
-  arrayMove,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import { TableHeader } from "./TableHeader";
+import { TableRowDndContext } from "./TableRowDndContext";
+import { TableDndContext } from "./TableDndContext";
 
-type TableProps = {
+type Props = {
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
-  data?: TableRowData[];
+
+  /**
+   * Data could be undefined when (re)fetching data.
+   */
+  data?: TableRow[];
+  columns: TableColumn[];
 };
 
-const defaultData: TableRowData[] = [];
+const defaultData: TableRow[] = [];
 
-export const Table: FC<TableProps> = (props) => {
-  const { data = defaultData, sorting, setSorting } = props;
+export const Table: FC<Props> = (props) => {
+  const { data = defaultData, columns, sorting, setSorting } = props;
 
-  const columns = useDynamicColumns(data);
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     columns.map((c) => String(c.accessorKey))
   );
@@ -55,34 +44,10 @@ export const Table: FC<TableProps> = (props) => {
     onColumnOrderChange: setColumnOrder,
   });
 
-  const { getHeaderGroups } = table;
   const rows = table.getRowModel().rows;
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (active && over && active.id !== over.id) {
-      setColumnOrder((columnOrder) => {
-        const oldIndex = columnOrder.indexOf(active.id as string);
-        const newIndex = columnOrder.indexOf(over.id as string);
-        return arrayMove(columnOrder, oldIndex, newIndex);
-      });
-    }
-  }
-
-  const sensors = useSensors(
-    // Important: prevent dragging when clicking on the sort button
-    useSensor(MouseSensor, { activationConstraint: { distance: 0.1 } }),
-    useSensor(TouchSensor, {})
-  );
-
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      modifiers={[restrictToHorizontalAxis]}
-      onDragEnd={handleDragEnd}
-      sensors={sensors}
-    >
+    <TableDndContext setColumnOrder={setColumnOrder}>
       <div
         style={{
           overflowX: "auto",
@@ -94,16 +59,13 @@ export const Table: FC<TableProps> = (props) => {
           style={{ width: table.getCenterTotalSize() }}
         >
           <thead>
-            {getHeaderGroups().map(({ id: groupId, headers }) => (
+            {table.getHeaderGroups().map(({ id: groupId, headers }) => (
               <tr key={groupId}>
-                <SortableContext
-                  items={columnOrder}
-                  strategy={horizontalListSortingStrategy}
-                >
+                <TableRowDndContext columnOrder={columnOrder}>
                   {headers.map((header) => (
                     <TableHeader key={header.id} header={header} />
                   ))}
-                </SortableContext>
+                </TableRowDndContext>
               </tr>
             ))}
           </thead>
@@ -111,15 +73,11 @@ export const Table: FC<TableProps> = (props) => {
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <SortableContext
-                    key={cell.id}
-                    items={columnOrder}
-                    strategy={horizontalListSortingStrategy}
-                  >
+                <TableRowDndContext columnOrder={columnOrder}>
+                  {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} cell={cell} />
-                  </SortableContext>
-                ))}
+                  ))}
+                </TableRowDndContext>
               </tr>
             ))}
 
@@ -127,7 +85,7 @@ export const Table: FC<TableProps> = (props) => {
           </tbody>
         </table>
       </div>
-    </DndContext>
+    </TableDndContext>
   );
 };
 
