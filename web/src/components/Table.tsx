@@ -89,7 +89,7 @@ export const Table: FC<Props> = (props) => {
   );
 };
 
-const Loading = (props: { noOfColumns: number }) => (
+const Loading: FC<{ noOfColumns: number }> = (props) => (
   <tr>
     <td colSpan={props.noOfColumns} style={{ textAlign: "center" }}>
       {"Loading ..."}

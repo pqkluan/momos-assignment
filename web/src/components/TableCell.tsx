@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, FC } from "react";
 
 import { Cell, flexRender } from "@tanstack/react-table";
 import { CSS } from "@dnd-kit/utilities";
@@ -10,7 +10,7 @@ type Props = {
   cell: Cell<TableRow, unknown>;
 };
 
-export const TableCell = (props: Props) => {
+export const TableCell: FC<Props> = (props) => {
   const { cell } = props;
   const { column, getContext } = cell;
 

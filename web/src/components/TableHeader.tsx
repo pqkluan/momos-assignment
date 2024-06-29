@@ -68,10 +68,10 @@ export const TableHeader: FC<Props> = (props) => {
   );
 };
 
-const SortButton = (props: {
+const SortButton: FC<{
   sort: SortDirection | false;
   toggleSorting: () => void;
-}) => {
+}> = (props) => {
   const { sort, toggleSorting } = props;
 
   const handleSort = (e: React.MouseEvent<HTMLDivElement>) => {
