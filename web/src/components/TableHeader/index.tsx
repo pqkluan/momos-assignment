@@ -9,8 +9,8 @@ import { Header, SortDirection, flexRender } from "@tanstack/react-table";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 
-import { TableRow } from "../types/table";
-import styles from "./Table.module.css";
+import { TableRow } from "../../types/table";
+import styles from "./index.module.css";
 
 type Props = PropsWithChildren<{
   header: Header<TableRow, unknown>;
@@ -86,7 +86,6 @@ const SortButton: FC<{
     return IconArrowsSort;
   })();
 
-  // return <Icon className={styles.sortIcon} size={14} onClick={handleSort} />;
   return (
     <span onClick={handleSort}>
       <Icon className={styles.sortIcon} size={14} />

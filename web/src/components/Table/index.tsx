@@ -6,12 +6,14 @@ import {
 } from "@tanstack/react-table";
 import { FC, useState } from "react";
 
-import { TableColumn, TableRow } from "../types/table";
-import styles from "./Table.module.css";
-import { TableCell } from "./TableCell";
-import { TableHeader } from "./TableHeader";
-import { TableRowDndContext } from "./TableRowDndContext";
+import { TableColumn, TableRow } from "../../types/table";
+
+import { TableCell } from "../TableCell";
+import { TableHeader } from "../TableHeader";
+
+import styles from "./index.module.css";
 import { TableDndContext } from "./TableDndContext";
+import { TableRowDndContext } from "./TableRowDndContext";
 
 type Props = {
   sorting: SortingState;

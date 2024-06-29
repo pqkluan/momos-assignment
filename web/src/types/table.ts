@@ -1,8 +1,8 @@
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
-import { PropertyPayload } from "./notion";
+import { PageProperty } from "./notion";
 
 export type TableRow = {
-  [key: string]: PropertyPayload | string;
+  [key: string]: PageProperty;
 };
 
-export type TableColumn = AccessorKeyColumnDef<TableRow, PropertyPayload>;
+export type TableColumn = AccessorKeyColumnDef<TableRow, PageProperty>;
