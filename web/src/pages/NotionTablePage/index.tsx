@@ -8,7 +8,12 @@ import { Table } from "../../components/Table";
 import { TableColumn } from "../../types/table";
 import { transformPageResponse } from "../../transforms/transformPageResponse";
 
-import { useDynamicColumns } from "./useDynamicColumns";
+import { useTableColumns } from "./useTableColumns";
+import { TableFilter } from "../../components/TableFilter";
+import {
+  DatabaseProperties,
+  QueryRequestFilterParam,
+} from "../../types/notion";
 
 export const NotionTablePage: FC = () => {
   const query = useQuery({
@@ -17,7 +22,7 @@ export const NotionTablePage: FC = () => {
   });
 
   // Create react table columns based on the database config
-  const columns = useDynamicColumns(query.data);
+  const columns = useTableColumns(query.data);
 
   const title = query.data?.title?.[0]?.plain_text ?? "Momos - Assignment";
 
@@ -25,8 +30,8 @@ export const NotionTablePage: FC = () => {
     <div>
       <h1>{title}</h1>
 
-      {columns.length > 0 ? (
-        <TableContent columns={columns} />
+      {columns.length > 0 && query.data?.properties ? (
+        <TableContent columns={columns} dbProperties={query.data.properties} />
       ) : query.isLoading ? (
         <div>{"Fetching table information..."}</div>
       ) : query.isError ? (
@@ -39,19 +44,24 @@ export const NotionTablePage: FC = () => {
   );
 };
 
-const TableContent: FC<{ columns: TableColumn[] }> = (props) => {
-  const { columns } = props;
+const TableContent: FC<{
+  columns: TableColumn[];
+  dbProperties: DatabaseProperties;
+}> = (props) => {
+  const { columns, dbProperties } = props;
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [filter, setFilter] = useState<QueryRequestFilterParam>(undefined);
 
   const query = useQuery({
-    queryKey: ["notion-query", sorting],
+    queryKey: ["notion-query", sorting, filter],
     queryFn: () =>
       notionApi.query({
         sorts: sorting.map((sort) => ({
           property: sort.id,
           direction: sort.desc ? "descending" : "ascending",
         })),
+        filter,
       }),
     select: (data) => transformPageResponse(data),
   });
@@ -65,10 +75,17 @@ const TableContent: FC<{ columns: TableColumn[] }> = (props) => {
         </Fragment>
       ) : (
         <Fragment>
+          <TableFilter
+            dbProperties={dbProperties}
+            filter={filter}
+            setFilter={setFilter}
+          />
+
           <Table
             data={query.data}
             columns={columns}
             sorting={sorting}
+            isLoading={query.isLoading}
             setSorting={setSorting}
           />
         </Fragment>

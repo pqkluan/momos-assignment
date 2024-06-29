@@ -16,6 +16,7 @@ import { TableDndContext } from "./TableDndContext";
 import { TableRowDndContext } from "./TableRowDndContext";
 
 type Props = {
+  isLoading: boolean;
   sorting: SortingState;
   setSorting: OnChangeFn<SortingState>;
 
@@ -29,7 +30,7 @@ type Props = {
 const defaultData: TableRow[] = [];
 
 export const Table: FC<Props> = (props) => {
-  const { data = defaultData, columns, sorting, setSorting } = props;
+  const { isLoading, data = defaultData, columns, sorting, setSorting } = props;
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     columns.map((c) => String(c.accessorKey))
@@ -83,7 +84,11 @@ export const Table: FC<Props> = (props) => {
               </tr>
             ))}
 
-            {rows.length === 0 && <Loading noOfColumns={columns.length} />}
+            {isLoading ? (
+              <Loading noOfColumns={columns.length} />
+            ) : rows.length === 0 ? (
+              <Empty noOfColumns={columns.length} />
+            ) : null}
           </tbody>
         </table>
       </div>
@@ -95,6 +100,14 @@ const Loading: FC<{ noOfColumns: number }> = (props) => (
   <tr>
     <td colSpan={props.noOfColumns} style={{ textAlign: "center" }}>
       {"Loading ..."}
+    </td>
+  </tr>
+);
+
+const Empty: FC<{ noOfColumns: number }> = (props) => (
+  <tr>
+    <td colSpan={props.noOfColumns} style={{ textAlign: "center" }}>
+      {"No data found."}
     </td>
   </tr>
 );

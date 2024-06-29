@@ -1,12 +1,18 @@
 import {
   DatabaseObjectResponse,
   PageObjectResponse,
+  QueryDatabaseParameters,
 } from "@notionhq/client/build/src/api-endpoints";
 
 // Notion don't expose the type of the properties, so we need to extract them ourselves
 
-export type DatabaseProperty = DatabaseObjectResponse["properties"][string];
-export type PageProperty = PageObjectResponse["properties"][string];
+export type DatabaseProperties = DatabaseObjectResponse["properties"];
+export type DatabaseProperty = DatabaseProperties[string];
+export type PageProperties = PageObjectResponse["properties"];
+export type PageProperty = PageProperties[string];
+
+export type QueryRequestParams = Omit<QueryDatabaseParameters, "database_id">;
+export type QueryRequestFilterParam = QueryRequestParams["filter"];
 
 // We only support these property types, based on the assignment requirements
 export type SupportedPropertyType =

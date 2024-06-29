@@ -1,10 +1,8 @@
 import {
   DatabaseObjectResponse,
   PageObjectResponse,
-  QueryDatabaseParameters,
 } from "@notionhq/client/build/src/api-endpoints";
-
-type RequestParams = Omit<QueryDatabaseParameters, "database_id">;
+import { QueryRequestParams } from "../types/notion";
 
 const API_ENDPOINT = "http://localhost:8000";
 
@@ -14,7 +12,7 @@ export const notionApi = {
     const body = await response.json();
     return body as DatabaseObjectResponse;
   },
-  query: async (params: RequestParams) => {
+  query: async (params: QueryRequestParams) => {
     const response = await fetch(`${API_ENDPOINT}/notion/query`, {
       method: "POST",
       body: JSON.stringify(params),

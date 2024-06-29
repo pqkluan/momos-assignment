@@ -58,10 +58,19 @@ export const TableCellRender: FC<CellContext<TableRow, PageProperty>> = (
   }
 
   if (meta.type === "number" && value.type === "number") {
+    if (typeof value.number !== "number") return <div />;
+
     // We could format the number with the meta.number.format
     // But it too much works to convert notion "format" to a valid number format. Eg. "dollar" to "$"
-    // Just attach the number and the format together, for now.
-    return <span>{[value.number, meta.number.format].join(" ")}</span>;
+    // So just leave out the formatting for now
+    return (
+      <span>
+        {[
+          new Intl.NumberFormat("en-GB").format(value.number),
+          meta.number.format,
+        ].join(" ")}
+      </span>
+    );
   }
 
   if (meta.type === "date" && value.type === "date") {

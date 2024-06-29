@@ -9,10 +9,7 @@ import { isSupportPropertyType } from "../../utils/isSupportPropertyType";
 
 const columnHelper = createColumnHelper<TableRow>();
 
-/**
- * Generate columns based on the first row of the data.
- */
-export function useDynamicColumns(
+export function useTableColumns(
   response?: DatabaseObjectResponse
 ): TableColumn[] {
   const prevColumns = useRef<TableColumn[]>([]);
