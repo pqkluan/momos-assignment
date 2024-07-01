@@ -22,4 +22,6 @@ export type SupportedPropertyType =
   | "select"
   | "status"
   | "multi_select"
-  | "checkbox";
+  | "checkbox"
+  | "created_time"
+  | "last_edited_time";

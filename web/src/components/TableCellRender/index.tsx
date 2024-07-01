@@ -91,6 +91,14 @@ export const TableCellRender: FC<CellContext<TableRow, PageProperty>> = (
     return <span>{value.rich_text.map((e) => e.plain_text).join(", ")}</span>;
   }
 
+  if (meta.type === "last_edited_time" && value.type === "last_edited_time") {
+    return <span>{new Date(value.last_edited_time).toUTCString()}</span>;
+  }
+
+  if (meta.type === "created_time" && value.type === "created_time") {
+    return <span>{new Date(value.created_time).toUTCString()}</span>;
+  }
+
   console.warn(`Unsupported type: ${value}`);
   return <span>{"?"}</span>;
 };

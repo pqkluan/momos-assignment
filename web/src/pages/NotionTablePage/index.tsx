@@ -6,10 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { notionApi } from "../../apis/notionApi";
 import { Table } from "../../components/Table";
 import { TableColumn } from "../../types/table";
+import { TableFilter } from "../../components/TableFilter";
 import { transformPageResponse } from "../../transforms/transformPageResponse";
 
 import { useTableColumns } from "./useTableColumns";
-import { TableFilter } from "../../components/TableFilter";
 import {
   DatabaseProperties,
   QueryRequestFilterParam,

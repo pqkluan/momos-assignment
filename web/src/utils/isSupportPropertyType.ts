@@ -8,6 +8,8 @@ const supportMaps: Record<SupportedPropertyType, true> = {
   rich_text: true,
   select: true,
   status: true,
+  created_time: true,
+  last_edited_time: true,
 };
 
 // This will ensure that the supportedTypes array is always in sync with the SupportedPropertyType type
